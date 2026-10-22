@@ -1,10 +1,10 @@
 import Foundation
 import Testing
-@testable import SpanishTwenty
+@testable import Verbos
 
 @MainActor struct SwiftDataManagerTests {
     @Test func sessionDeckAndProgressSurviveReopening() async throws {
-        let directory = FileManager.default.temporaryDirectory.appending(path: "SpanishTwentyTests-\(UUID())")
+        let directory = FileManager.default.temporaryDirectory.appending(path: "VerbosTests-\(UUID())")
         defer { try? FileManager.default.removeItem(at: directory) }
         let storeURL = directory.appending(path: "nested/Sessions.store")
         let env = try TestEnvironment()

@@ -1,10 +1,10 @@
 import Foundation
 import Testing
-@testable import SpanishTwenty
+@testable import Verbos
 
 @MainActor struct SettingsViewModelTests {
     @Test func selectionUpdatesFeature() throws {
-        let name = "SpanishTwentyTests.\(UUID())"
+        let name = "VerbosTests.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
         let feature = SettingsFeature(defaults: defaults)

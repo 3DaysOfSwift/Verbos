@@ -1,8 +1,10 @@
 # Verbos: Learn Spanish
 
-A separate CFA iOS app adapted from Todays Twenty. Open SpanishTwenty.xcodeproj and run the SpanishTwenty scheme. Bundle ID: com.3DaysOfSwiftConcurrency.SpanishTwenty. The original maths app is unchanged.
+A separate CFA iOS app adapted from Todays Twenty. Open Verbos.xcodeproj and run the Verbos scheme. Bundle ID: com.3DaysOfSwiftConcurrency.Verbos. The original maths app is unchanged.
 
-The public brand is **Verbos: Learn Spanish**, with **Verbos** used in compact in-app headings. The internal project/module, bundle identifier and SpanishTwenty storage directory deliberately remain stable so existing installations retain their progress and preferences. The new opaque 1024-pixel app icon is installed in Assets.xcassets/AppIcon.appiconset. See Branding/ICON.md for the generated artwork and prompt.
+The public brand is **Verbos: Learn Spanish**, with **Verbos** used in compact in-app headings. The project, scheme, app module and source folder are Verbos; the test target is VerbosTests. The opaque 1024-pixel app icon is installed in Assets.xcassets/AppIcon.appiconset. See Branding/ICON.md for the generated artwork and prompt.
+
+The complete internal rename changes the bundle identifier and storage directory. iOS treats this as a separate installation; progress and preferences from the earlier development app are not automatically transferred. That installation and its data are not removed. Git history is preserved.
 
 ## Daily practice
 
@@ -28,7 +30,7 @@ Modes: present, finished past (preterite), used to/background (imperfect), futur
 
 PracticeFeature owns daily sessions, scores and mode/verb locking. LibraryFeature owns supported Cuentiva books and tables, building questions through ConjugationQuestions. DayStreakFeature interprets practice history. SettingsFeature owns the preferred learning mode.
 
-SwiftDataManager lazily opens Application Support/SpanishTwenty/Sessions.store. CuentivaContentRepository reads bundled content and maintains one replaceable Books.json cache; NetworkingManager wraps URLSession. AppModel.live composes these dependencies and exposes only Features. Each screen has its own ViewModel.
+SwiftDataManager lazily opens Application Support/Verbos/Sessions.store. CuentivaContentRepository reads bundled content and maintains one replaceable Books.json cache; NetworkingManager wraps URLSession. AppModel.live composes these dependencies and exposes only Features. Each screen has its own ViewModel.
 
 The book catalogue is not user progress. Network requests only download public books; answers and progress remain on the device. Settings and tab navigation never depend on a database or network startup gate.
 

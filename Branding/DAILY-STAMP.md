@@ -1,6 +1,6 @@
 # Daily completion stamp
 
-Created with built-in image generation from Matthew's supplied circular Verbos badge on 22 October 2026. Original: Daily-Completion-Stamp-Original.png. The app uses the transparent 256-pixel PNG in ../SpanishTwenty/Assets.xcassets/DailyCompletionStamp.imageset/daily-completion-stamp.png.
+Created with built-in image generation from Matthew's supplied circular Verbos badge on 22 October 2026. Original: Daily-Completion-Stamp-Original.png. The app uses the transparent 256-pixel PNG in ../Verbos/Assets.xcassets/DailyCompletionStamp.imageset/daily-completion-stamp.png.
 
 DailyCompletionStamp is a stateless SwiftUI component with original-colour rendering and a circular display mask. StreakStrip uses it only for completed days, on both Practice and Day Streak. Unfinished markers, VoiceOver completion descriptions, scoring, storage and streak rules remain unchanged.
 

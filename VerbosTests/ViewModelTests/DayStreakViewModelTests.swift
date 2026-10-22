@@ -1,5 +1,5 @@
 import Testing
-@testable import SpanishTwenty
+@testable import Verbos
 
 @MainActor struct DayStreakViewModelTests {
     @Test func readsSameSavedProgress() async throws {

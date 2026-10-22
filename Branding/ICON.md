@@ -1,6 +1,6 @@
 # Verbos icon
 
-Created with the built-in image-generation tool on 22 October 2026. The full-resolution original is Verbos-Icon-Original.png. The app consumes the 1024 × 1024 opaque PNG at ../SpanishTwenty/Assets.xcassets/AppIcon.appiconset/Verbos-App-Icon.png. The original CFA placeholder is retained here as CFA-App-Icon-Previous.png, outside the app target.
+Created with the built-in image-generation tool on 22 October 2026. The full-resolution original is Verbos-Icon-Original.png. The app consumes the 1024 × 1024 opaque PNG at ../Verbos/Assets.xcassets/AppIcon.appiconset/Verbos-App-Icon.png. The original CFA placeholder is retained here as CFA-App-Icon-Previous.png, outside the app target.
 
 The artwork uses a white V/checkmark and a teal speech bubble. Square corners are intentional; iOS applies the icon mask. No gameplay, database path or bundle identifier changes accompany the branding update.
 

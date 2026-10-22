@@ -1,11 +1,11 @@
 import Foundation
 import Testing
-@testable import SpanishTwenty
+@testable import Verbos
 
 @MainActor struct PracticeViewModelTests {
     @Test func revealAdvancesAfterFeedbackWithoutScoring() async throws {
         let env = try TestEnvironment()
-        let name = "SpanishTwentyTests.\(UUID())"
+        let name = "VerbosTests.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
         let model = PracticeViewModel(practiceFeature: env.practice, dayStreakFeature: env.streak,

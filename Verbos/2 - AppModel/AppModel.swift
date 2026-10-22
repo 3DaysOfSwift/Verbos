@@ -19,7 +19,7 @@ final class AppModel {
 
     static func live() -> AppModel {
         let storeURL = URL.applicationSupportDirectory
-            .appending(path: "SpanishTwenty", directoryHint: .isDirectory)
+            .appending(path: "Verbos", directoryHint: .isDirectory)
             .appending(path: "Sessions.store")
         let repository = SwiftDataManager(storeURL: storeURL)
         let contentRepository = CuentivaContentRepository(

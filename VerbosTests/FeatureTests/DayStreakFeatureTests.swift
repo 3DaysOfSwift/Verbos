@@ -1,5 +1,5 @@
 import Testing
-@testable import SpanishTwenty
+@testable import Verbos
 
 @MainActor struct DayStreakFeatureTests {
     @Test func completedDailySessionProducesOneStreakDay() async throws {

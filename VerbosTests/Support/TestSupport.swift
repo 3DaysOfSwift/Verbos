@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import SpanishTwenty
+@testable import Verbos
 
 enum TestFailure: Error { case storage }
 
@@ -42,7 +42,7 @@ enum ContentFixtures {
     static func load() throws -> LearningContent {
         let root = URL(filePath: #filePath).deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
-            .appending(path: "SpanishTwenty/3 - App Resources")
+            .appending(path: "Verbos/3 - App Resources")
         let booksURL = Bundle.main.url(forResource: "books", withExtension: "json") ?? root.appending(path: "books.json")
         let verbsURL = Bundle.main.url(forResource: "verbs", withExtension: "json") ?? root.appending(path: "verbs.json")
         return LearningContent(

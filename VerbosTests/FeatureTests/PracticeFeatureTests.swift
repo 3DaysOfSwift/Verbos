@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import SpanishTwenty
+@testable import Verbos
 
 @MainActor struct PracticeFeatureTests {
     @Test func twentyAnswersFinishAndOnlyOneExtraIsAllowed() async throws {

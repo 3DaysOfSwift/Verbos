@@ -10,7 +10,7 @@ final class AppLaunchDelegate: NSObject, UIApplicationDelegate {
 }
 
 @main
-struct SpanishTwentyApp: App {
+struct VerbosApp: App {
     @UIApplicationDelegateAdaptor(AppLaunchDelegate.self) private var launchDelegate
     @State private var themeManager = ThemeManager()
 
