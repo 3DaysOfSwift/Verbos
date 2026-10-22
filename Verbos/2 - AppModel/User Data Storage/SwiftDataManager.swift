@@ -14,13 +14,13 @@ final class StoredSession {
 
 @ModelActor
 actor SessionStore {
-    func fetchSessions() throws -> [PracticeSession] {
+    func fetchSessions() throws -> [TodaySession] {
         try modelContext.fetch(FetchDescriptor<StoredSession>()).map {
-            try JSONDecoder().decode(PracticeSession.self, from: $0.payload)
+            try JSONDecoder().decode(TodaySession.self, from: $0.payload)
         }
     }
 
-    func save(_ session: PracticeSession) throws {
+    func save(_ session: TodaySession) throws {
         let identifier = session.id
         let descriptor = FetchDescriptor<StoredSession>(predicate: #Predicate { $0.id == identifier })
         let payload = try JSONEncoder().encode(session)
@@ -57,11 +57,11 @@ actor SwiftDataManager: SessionRepository {
         return store
     }
 
-    func fetchSessions() async throws -> [PracticeSession] {
+    func fetchSessions() async throws -> [TodaySession] {
         try await store().fetchSessions()
     }
 
-    func save(_ session: PracticeSession) async throws {
+    func save(_ session: TodaySession) async throws {
         try await store().save(session)
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 // Disabling a question blocks interaction without dimming its feedback or artwork.
-struct PracticeButtonStyle: ButtonStyle {
+struct TodayButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
     }
@@ -83,7 +83,7 @@ struct StreakStrip: View {
             }
         }
         .padding(.horizontal, 20).padding(.vertical, 12)
-        .background(.ultraThinMaterial)
+        .background(themeManager.current.background)
     }
 }
 

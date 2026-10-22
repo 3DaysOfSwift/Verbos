@@ -3,14 +3,14 @@ import Foundation
 @MainActor
 final class AppModel {
     static let shared = live()
-    let practiceFeature: PracticeFeature
+    let todayFeature: TodayFeature
     let dayStreakFeature: DayStreakFeature
     let settingsFeature: SettingsFeature
     let libraryFeature: LibraryFeature
     private var didFinishLaunching: Bool
 
-    init(practiceFeature: PracticeFeature, dayStreakFeature: DayStreakFeature, settingsFeature: SettingsFeature, libraryFeature: LibraryFeature) {
-        self.practiceFeature = practiceFeature
+    init(todayFeature: TodayFeature, dayStreakFeature: DayStreakFeature, settingsFeature: SettingsFeature, libraryFeature: LibraryFeature) {
+        self.todayFeature = todayFeature
         self.dayStreakFeature = dayStreakFeature
         self.settingsFeature = settingsFeature
         self.libraryFeature = libraryFeature
@@ -26,10 +26,10 @@ final class AppModel {
             cacheURL: storeURL.deletingLastPathComponent().appending(path: "Books.json"),
             networkingManager: NetworkingManager())
         let libraryFeature = LibraryFeature(repository: contentRepository)
-        let practiceFeature = PracticeFeature(repository: repository, libraryFeature: libraryFeature)
-        let dayStreakFeature = DayStreakFeature(practiceFeature: practiceFeature)
+        let todayFeature = TodayFeature(repository: repository, libraryFeature: libraryFeature)
+        let dayStreakFeature = DayStreakFeature(todayFeature: todayFeature)
         let settingsFeature = SettingsFeature(defaults: .standard)
-        return AppModel(practiceFeature: practiceFeature, dayStreakFeature: dayStreakFeature,
+        return AppModel(todayFeature: todayFeature, dayStreakFeature: dayStreakFeature,
                         settingsFeature: settingsFeature, libraryFeature: libraryFeature)
     }
 

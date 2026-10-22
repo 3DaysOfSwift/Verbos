@@ -10,7 +10,7 @@ import Testing
         let env = try TestEnvironment()
         try await env.start()
         try await env.answerCorrectly()
-        let session = try #require(env.practice.currentSession)
+        let session = try #require(env.today.currentSession)
         let manager = SwiftDataManager(storeURL: storeURL)
         try await manager.save(session)
         let reopened = SwiftDataManager(storeURL: storeURL)

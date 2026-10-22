@@ -2,7 +2,7 @@ import Foundation
 import Observation
 
 @MainActor @Observable
-final class PracticeFeature {
+final class TodayFeature {
     enum Command: Hashable {
         case refresh
         case start(extra: Bool, mode: LearningMode)
@@ -13,7 +13,7 @@ final class PracticeFeature {
         case shuffleVerb
     }
 
-    private(set) var sessions: [PracticeSession] = []
+    private(set) var sessions: [TodaySession] = []
     private(set) var today: Date
     private(set) var hasLoaded = false
     let calendar: Calendar
@@ -34,12 +34,11 @@ final class PracticeFeature {
         today = calendar.startOfDay(for: now())
     }
 
-    var selectedBook: LearningBook? { libraryFeature.book(for: currentSession?.verbID ?? selectedVerbID) }
-
-    var todaySessions: [PracticeSession] {
+    var todaySessions: [TodaySession] {
         sessions.filter { calendar.isDate($0.day, inSameDayAs: today) }
     }
-    var currentSession: PracticeSession? {
+    var isSelectedVerbReady: Bool { libraryFeature.book(for: selectedVerbID) != nil }
+    var currentSession: TodaySession? {
         todaySessions.first(where: { $0.isExtraPractice }) ?? todaySessions.first
     }
     var canStartExtraPractice: Bool {
@@ -87,7 +86,7 @@ final class PracticeFeature {
             return
         case let .start(extra, mode):
             guard extra ? canStartExtraPractice : todaySessions.isEmpty else {
-                throw PracticeError.unavailableSession
+                throw TodayError.unavailableSession
             }
             try await libraryFeature.load()
             let verbID = extra ? (currentSession?.verbID ?? selectedVerbID) : selectedVerbID
@@ -95,7 +94,7 @@ final class PracticeFeature {
             guard let question = deck.first, let book = libraryFeature.book(for: verbID) else {
                 throw LearningContentError.unavailableBook
             }
-            let session = PracticeSession(id: UUID(), day: today, isExtraPractice: extra,
+            let session = TodaySession(id: UUID(), day: today, isExtraPractice: extra,
                 mode: mode, verbID: verbID, bookTitle: book.title, deck: deck, question: question)
             try await save(session)
         case .shuffleVerb where currentSession == nil:
@@ -103,33 +102,33 @@ final class PracticeFeature {
             selectedVerbID = try libraryFeature.differentVerb(excluding: selectedVerbID)
         default:
             guard var session = currentSession, !session.isComplete else {
-                throw PracticeError.unavailableSession
+                throw TodayError.unavailableSession
             }
             switch command {
             case let .answer(questionID, value):
-                guard session.question.id == questionID else { throw PracticeError.staleQuestion }
+                guard session.question.id == questionID else { throw TodayError.staleQuestion }
                 guard !session.question.isResolved, session.question.choices.contains(value) else { return }
                 if value == session.question.answer {
                     session.question.isAnswered = true
                     if session.question.wrongAnswers.isEmpty {
                         session.correctCount += 1
                     }
-                    if session.correctCount >= PracticeSession.target { session.completedAt = now() }
+                    if session.correctCount >= TodaySession.target { session.completedAt = now() }
                 } else {
                     session.question.wrongAnswers.insert(value)
                 }
             case let .reveal(questionID):
-                guard session.question.id == questionID else { throw PracticeError.staleQuestion }
+                guard session.question.id == questionID else { throw TodayError.staleQuestion }
                 guard !session.question.isResolved else { return }
                 session.question.isRevealed = true
             case let .next(questionID):
-                guard session.question.id == questionID else { throw PracticeError.staleQuestion }
-                guard session.question.isResolved else { throw PracticeError.unresolvedQuestion }
+                guard session.question.id == questionID else { throw TodayError.staleQuestion }
+                guard session.question.isResolved else { throw TodayError.unresolvedQuestion }
                 session.questionNumber += 1
                 guard !session.deck.isEmpty else { throw LearningContentError.missingContent }
                 session.question = session.deck[(session.questionNumber - 1) % session.deck.count].freshCopy()
             case .mode, .shuffleVerb:
-                guard session.canChangeFocus else { throw PracticeError.focusLocked }
+                guard session.canChangeFocus else { throw TodayError.focusLocked }
                 try await libraryFeature.load()
                 let mode: LearningMode
                 let verbID: String
@@ -157,7 +156,7 @@ final class PracticeFeature {
         }
     }
 
-    private func save(_ session: PracticeSession) async throws {
+    private func save(_ session: TodaySession) async throws {
         // Publish only durable results; failed writes leave the same question ready for retry.
         try await repository.save(session)
         if let index = sessions.firstIndex(where: { $0.id == session.id }) {

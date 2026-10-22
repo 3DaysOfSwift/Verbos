@@ -1,8 +1,7 @@
 import SwiftUI
 
-struct PracticeView: View {
-    @State private var viewModel = PracticeViewModel()
-    @State private var isShowingBook = false
+struct TodayView: View {
+    @State private var viewModel = TodayViewModel()
     @Environment(ThemeManager.self) private var themeManager
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -10,9 +9,10 @@ struct PracticeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                StreakStrip(streak: viewModel.streak, days: viewModel.week)
-                ScrollView {
+            ScrollView {
+                VStack(spacing: 0) {
+                    StreakStrip(streak: viewModel.streak, days: viewModel.week)
+                        .frame(maxWidth: .infinity)
                     VStack(spacing: 22) {
                         if let error = viewModel.errorMessage {
                             OperationErrorView(message: error, retry: viewModel.retry)
@@ -20,10 +20,8 @@ struct PracticeView: View {
                         if let session = viewModel.session {
                             if session.isComplete { completion(session) }
                             else { question(session) }
-                        } else if viewModel.hasLoaded {
-                            introduction
                         } else if viewModel.errorMessage == nil {
-                            ProgressView("Fetching your practice…").padding(40)
+                            introduction
                         }
                     }
                     .padding(20)
@@ -32,8 +30,7 @@ struct PracticeView: View {
                 }
             }
             .background(themeManager.current.background)
-            .navigationTitle("Verbos")
-            .sheet(isPresented: $isShowingBook) { BookView(verbID: viewModel.selectedVerbID) }
+            .navigationTitle("Today")
             .navigationBarTitleDisplayMode(.inline)
             .task { await viewModel.refresh().value }
             .task(id: scenePhase == .active ? viewModel.questionAwaitingAdvanceID : nil) {
@@ -55,11 +52,42 @@ struct PracticeView: View {
     private var introduction: some View {
         VStack(spacing: 24) {
             HeroCard {
-                VStack(spacing: 16) {
-                    Text("A LITTLE EVERY DAY").font(.caption.weight(.bold)).tracking(2).opacity(0.7)
-                    Text("\(PracticeSession.target)").font(.system(size: 100, weight: .bold, design: .rounded))
-                    Text("Small words.\nA wider world.").font(.title.bold()).multilineTextAlignment(.center)
-                    Text("Twenty Spanish answers. One daily habit.").font(.subheadline).opacity(0.8)
+                VStack(spacing: 18) {
+                    VStack(spacing: 6) {
+                        Text(viewModel.selectedVerbID.capitalized)
+                            .font(.system(size: 56, weight: .bold, design: .rounded))
+                            .frame(height: 68)
+                            .opacity(viewModel.isSelectedVerbReady ? 1 : 0)
+                            .animation(reduceMotion ? nil : .easeIn(duration: 0.25), value: viewModel.isSelectedVerbReady)
+                        Button("Different verb", systemImage: "shuffle") {
+                            viewModel.perform(.shuffleVerb)
+                        }
+                        .frame(minHeight: 48)
+                        .disabled(!viewModel.isSelectedVerbReady)
+                        Button {
+                            viewModel.perform(.start(extra: false, mode: viewModel.preferredMode))
+                        } label: {
+                            Image(systemName: "play.fill")
+                                .font(.title.weight(.bold))
+                                .frame(width: 76, height: 76)
+                                .foregroundStyle(themeManager.current.heroBottom)
+                                .background(.white, in: Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Start 20 questions about \(viewModel.selectedVerbID)")
+                        .disabled(!viewModel.isSelectedVerbReady)
+                    }
+                    Picker("Learning mode", selection: Binding(
+                        get: { viewModel.preferredMode }, set: { viewModel.selectMode($0) }
+                    )) {
+                        ForEach(LearningMode.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(.white)
+                    .frame(minHeight: 48)
+                    Text("Practice one verb twenty times each day.")
+                        .font(.footnote)
+                        .opacity(0.8)
                 }
             }
             VStack(alignment: .leading, spacing: 16) {
@@ -67,45 +95,20 @@ struct PracticeView: View {
                 Label("A correct first try earns one point.", systemImage: "checkmark.circle")
                 Label("Tap a question to reveal it, without a point.", systemImage: "hand.tap")
             }.font(.subheadline).frame(maxWidth: .infinity, alignment: .leading)
-            focusControls
-            PrimaryAction(title: "Start today's twenty", symbol: "arrow.right") {
-                viewModel.perform(.start(extra: false, mode: viewModel.preferredMode))
-            }
             Text("One daily session, plus one optional extra practice.\nYour place is saved after every answer.")
                 .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
         }
     }
 
-    private var focusControls: some View {
-        VStack(spacing: 12) {
-            Text(viewModel.selectedVerbID.capitalized).font(.title2.bold())
-            Text(viewModel.selectedBookTitle).font(.subheadline).multilineTextAlignment(.center)
-            HStack {
-                Button("Different verb", systemImage: "shuffle") { viewModel.perform(.shuffleVerb) }
-                    .frame(minHeight: 48)
-                Spacer()
-                Button("Read the book", systemImage: "book") { isShowingBook = true }
-                    .frame(minHeight: 48)
-            }
-            Picker("Learning mode", selection: Binding(
-                get: { viewModel.preferredMode }, set: { viewModel.selectMode($0) })) {
-                ForEach(LearningMode.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.menu).frame(minHeight: 48)
-            Text(viewModel.preferredMode.detail).font(.footnote).foregroundStyle(.secondary)
-        }
-        .padding(20).background(themeManager.current.surface, in: RoundedRectangle(cornerRadius: 24))
-    }
-
-    private func question(_ session: PracticeSession) -> some View {
+    private func question(_ session: TodaySession) -> some View {
         VStack(spacing: 22) {
             HStack {
                 Label(session.isExtraPractice ? "Extra practice" : "Daily practice", systemImage: "sparkles")
                 Spacer()
-                Text("\(session.correctCount) / \(PracticeSession.target)").monospacedDigit().bold()
+                Text("\(session.correctCount) / \(TodaySession.target)").monospacedDigit().bold()
             }.font(.subheadline).foregroundStyle(.secondary)
-            ProgressView(value: Double(session.correctCount), total: Double(PracticeSession.target))
-                .accessibilityLabel("\(session.correctCount) of \(PracticeSession.target) correct answers")
+            ProgressView(value: Double(session.correctCount), total: Double(TodaySession.target))
+                .accessibilityLabel("\(session.correctCount) of \(TodaySession.target) correct answers")
             Button {
                 viewModel.perform(.reveal(questionID: session.question.id))
             } label: {
@@ -123,7 +126,7 @@ struct PracticeView: View {
                     }
                 }
             }
-            .buttonStyle(PracticeButtonStyle())
+            .buttonStyle(TodayButtonStyle())
             .disabled(session.question.isResolved)
             .accessibilityLabel("\(session.question.person) \(session.question.spanish), \(session.question.tense.title)")
             .accessibilityHint("Double tap to reveal the answer. Revealed answers earn no point.")
@@ -168,19 +171,19 @@ struct PracticeView: View {
                 .strokeBorder(themeManager.current.tint.opacity(isCorrect || isWrong ? 0 : 0.18)))
             .padding(.top, index % 2 == 1 ? 7 : 0)
         }
-        .buttonStyle(PracticeButtonStyle())
+        .buttonStyle(TodayButtonStyle())
         .disabled(question.isResolved || isWrong)
         .accessibilityLabel("\(answer)\(isCorrect ? ", correct answer" : isWrong ? ", incorrect answer" : "")")
     }
 
-    private func completion(_ session: PracticeSession) -> some View {
+    private func completion(_ session: TodaySession) -> some View {
         VStack(spacing: 24) {
             HeroCard {
                 VStack(spacing: 20) {
                     Image(systemName: "checkmark.circle.fill").font(.system(size: 92)).foregroundStyle(.mint)
                     Text(viewModel.isDayLocked ? "A brilliant day's work." : "Today's twenty. Done.")
                         .font(.largeTitle.bold()).multilineTextAlignment(.center)
-                    Text("\(PracticeSession.target) answers you knew.\nThat's something to feel good about.")
+                    Text("\(TodaySession.target) answers you knew.\nThat's something to feel good about.")
                         .multilineTextAlignment(.center).opacity(0.8)
                 }
             }
@@ -189,7 +192,7 @@ struct PracticeView: View {
                 PrimaryAction(title: "One more? Extra practice", symbol: "plus.circle") {
                     viewModel.perform(.start(extra: true, mode: session.mode))
                 }
-                Text("Optional: another \(PracticeSession.target) correct answers. Your streak is already secured.")
+                Text("Optional: another \(TodaySession.target) correct answers. Your streak is already secured.")
                     .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
             } else {
                 Label("All done. Come back tomorrow.", systemImage: "moon.stars.fill").font(.headline)

@@ -5,15 +5,15 @@ import Testing
 enum TestFailure: Error { case storage }
 
 actor MemorySessions: SessionRepository {
-    var sessions: [PracticeSession] = []
+    var sessions: [TodaySession] = []
     var shouldFail = false
     private(set) var saveCount = 0
     func fail(_ flag: Bool) { shouldFail = flag }
-    func fetchSessions() throws -> [PracticeSession] {
+    func fetchSessions() throws -> [TodaySession] {
         if shouldFail { throw TestFailure.storage }
         return sessions
     }
-    func save(_ session: PracticeSession) throws {
+    func save(_ session: TodaySession) throws {
         if shouldFail { throw TestFailure.storage }
         sessions.removeAll { $0.id == session.id }
         sessions.append(session)
@@ -59,7 +59,7 @@ enum ContentFixtures {
     let repository: MemorySessions
     let content: MemoryContent
     let library: LibraryFeature
-    let practice: PracticeFeature
+    let today: TodayFeature
     let streak: DayStreakFeature
     let clock: TestClock
     let calendar: Calendar
@@ -72,22 +72,22 @@ enum ContentFixtures {
         self.calendar = calendar
         content = MemoryContent(try ContentFixtures.load())
         library = LibraryFeature(repository: content)
-        practice = PracticeFeature(repository: repository, calendar: calendar, now: { clock.date }, libraryFeature: library)
-        streak = DayStreakFeature(practiceFeature: practice, calendar: calendar)
+        today = TodayFeature(repository: repository, calendar: calendar, now: { clock.date }, libraryFeature: library)
+        streak = DayStreakFeature(todayFeature: today, calendar: calendar)
     }
-    func start() async throws { try await practice.perform(.start(extra: false, mode: .mixed)) }
+    func start() async throws { try await today.perform(.start(extra: false, mode: .mixed)) }
     func answerCorrectly() async throws {
-        let question = try #require(practice.currentSession?.question)
-        try await practice.perform(.answer(questionID: question.id, value: question.answer))
+        let question = try #require(today.currentSession?.question)
+        try await today.perform(.answer(questionID: question.id, value: question.answer))
     }
     func finish() async throws {
         // A finite bound makes a broken completion rule fail rather than hang the suite.
         for _ in 0..<20 {
-            let session = try #require(practice.currentSession)
+            let session = try #require(today.currentSession)
             if session.isComplete { return }
-            if session.question.isResolved { try await practice.perform(.next(questionID: session.question.id)) }
+            if session.question.isResolved { try await today.perform(.next(questionID: session.question.id)) }
             try await answerCorrectly()
         }
-        #expect(practice.currentSession?.isComplete == true)
+        #expect(today.currentSession?.isComplete == true)
     }
 }

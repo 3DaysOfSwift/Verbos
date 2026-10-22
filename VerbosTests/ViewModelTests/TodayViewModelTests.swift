@@ -2,13 +2,13 @@ import Foundation
 import Testing
 @testable import Verbos
 
-@MainActor struct PracticeViewModelTests {
+@MainActor struct TodayViewModelTests {
     @Test func revealAdvancesAfterFeedbackWithoutScoring() async throws {
         let env = try TestEnvironment()
         let name = "VerbosTests.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
-        let model = PracticeViewModel(practiceFeature: env.practice, dayStreakFeature: env.streak,
+        let model = TodayViewModel(todayFeature: env.today, dayStreakFeature: env.streak,
                                       settingsFeature: SettingsFeature(defaults: defaults))
         await model.perform(.start(extra: false, mode: .mixed)).value
         #expect(model.isSessionInProgress)

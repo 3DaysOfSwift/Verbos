@@ -46,8 +46,8 @@ struct SettingsView: View {
                         Text("App")
                         Spacer()
                         HStack(spacing: 6) {
-                            Image(systemName: "checkmark")
-                                .font(.system(.caption2, design: .rounded, weight: .bold))
+                            Image(systemName: "checkmark.bubble.fill")
+                                .font(.title3)
                             Text("Verbos")
                                 .font(.system(.title3, design: .rounded, weight: .bold))
                         }
@@ -55,13 +55,27 @@ struct SettingsView: View {
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("Verbos: Learn Spanish")
                     }
-                    Text("Learn Spanish. Twenty answers a day.")
-                        .font(.footnote).foregroundStyle(.secondary)
                     LabeledContent("Storage", value: "SwiftData · on device")
-                    LabeledContent("Learning content", value: "Cuentiva")
-                    LabeledContent("Architecture", value: "CFA iOS Architecture")
-                    Text("Built with Cooperative Feature Architecture.")
-                        .font(.footnote).foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Learning content")
+                            Spacer()
+                            Text("Open Source")
+                                .foregroundStyle(.secondary)
+                        }
+                        Text("Cuentiva Spanish Book Collection")
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        LabeledContent("Architecture", value: "CFA iOS Architecture")
+                        Text("Built with Cooperative Feature Architecture.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
                 }
                 .listRowBackground(themeManager.current.surface)
                 Section {

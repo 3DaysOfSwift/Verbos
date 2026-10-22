@@ -7,9 +7,10 @@ struct DayStreakView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                StreakStrip(streak: viewModel.currentStreak, days: viewModel.week)
-                ScrollView {
+            ScrollView {
+                VStack(spacing: 0) {
+                    StreakStrip(streak: viewModel.currentStreak, days: viewModel.week)
+                        .frame(maxWidth: .infinity)
                     VStack(spacing: 24) {
                         if let error = viewModel.errorMessage {
                             OperationErrorView(message: error) { viewModel.refresh() }

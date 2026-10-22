@@ -5,7 +5,8 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            Tab("Practice", systemImage: "character.bubble.fill") { PracticeView() }
+            Tab("Today", systemImage: "character.bubble.fill") { TodayView() }
+            Tab("Daily book", systemImage: "book.fill") { DailyBookView() }
             Tab("Day Streak", systemImage: "flame.fill") { DayStreakView() }
             Tab("Settings", systemImage: "gearshape.fill") { SettingsView() }
         }

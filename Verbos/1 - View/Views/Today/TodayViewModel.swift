@@ -2,42 +2,41 @@ import Foundation
 import Observation
 
 @MainActor @Observable
-final class PracticeViewModel {
-    private let practiceFeature: PracticeFeature
+final class TodayViewModel {
+    private let todayFeature: TodayFeature
     private let dayStreakFeature: DayStreakFeature
     private let settingsFeature: SettingsFeature
     private(set) var errorMessage: String?
     @ObservationIgnored private var queuedCommandTask: Task<Void, Never>?
-    @ObservationIgnored private var pendingCommandTasks: [PracticeFeature.Command: Task<Void, Never>] = [:]
+    @ObservationIgnored private var pendingCommandTasks: [TodayFeature.Command: Task<Void, Never>] = [:]
     @ObservationIgnored private var lastCommandID: UUID?
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private var automaticAdvanceTask: Task<Void, Never>?
     @ObservationIgnored private var automaticAdvanceID: UUID?
     @ObservationIgnored private var scheduledQuestionID: UUID?
-    @ObservationIgnored private var retryCommand: PracticeFeature.Command = .refresh
+    @ObservationIgnored private var retryCommand: TodayFeature.Command = .refresh
 
-    init(practiceFeature: PracticeFeature = AppModel.shared.practiceFeature,
+    init(todayFeature: TodayFeature = AppModel.shared.todayFeature,
          dayStreakFeature: DayStreakFeature = AppModel.shared.dayStreakFeature,
          settingsFeature: SettingsFeature = AppModel.shared.settingsFeature) {
-        self.practiceFeature = practiceFeature
+        self.todayFeature = todayFeature
         self.dayStreakFeature = dayStreakFeature
         self.settingsFeature = settingsFeature
     }
 
-    var session: PracticeSession? { practiceFeature.currentSession }
+    var session: TodaySession? { todayFeature.currentSession }
     var isSessionInProgress: Bool { session?.isComplete == false }
     var questionAwaitingAdvanceID: UUID? {
         guard let session, !session.isComplete, session.question.isResolved else { return nil }
         return session.question.id
     }
-    var hasLoaded: Bool { practiceFeature.hasLoaded }
-    var canStartExtraPractice: Bool { practiceFeature.canStartExtraPractice }
-    var isDayLocked: Bool { practiceFeature.isDayLocked }
+    var hasLoaded: Bool { todayFeature.hasLoaded }
+    var isSelectedVerbReady: Bool { todayFeature.isSelectedVerbReady }
+    var canStartExtraPractice: Bool { todayFeature.canStartExtraPractice }
+    var isDayLocked: Bool { todayFeature.isDayLocked }
     var streak: Int { dayStreakFeature.currentStreak }
     var week: [StreakDay] { dayStreakFeature.week }
-    var selectedVerbID: String { session?.verbID ?? practiceFeature.selectedVerbID }
-    var selectedBook: LearningBook? { practiceFeature.selectedBook }
-    var selectedBookTitle: String { session?.bookTitle ?? selectedBook?.title ?? "Cuentiva verb stories" }
+    var selectedVerbID: String { session?.verbID ?? todayFeature.selectedVerbID }
     var preferredMode: LearningMode { settingsFeature.preferredMode }
     var feedback: String {
         guard let question = session?.question else { return "" }
@@ -56,7 +55,7 @@ final class PracticeViewModel {
         if let refreshTask { return refreshTask }
         let task = Task { @MainActor in
             defer { refreshTask = nil }
-            do { try await practiceFeature.perform(.refresh) }
+            do { try await todayFeature.perform(.refresh) }
             catch {
                 retryCommand = .refresh
                 errorMessage = error.localizedDescription
@@ -67,7 +66,7 @@ final class PracticeViewModel {
     }
 
     @discardableResult
-    func perform(_ command: PracticeFeature.Command) -> Task<Void, Never> {
+    func perform(_ command: TodayFeature.Command) -> Task<Void, Never> {
         if let task = pendingCommandTasks[command] { return task }
         let predecessor = queuedCommandTask
         let identifier = UUID()
@@ -82,7 +81,7 @@ final class PracticeViewModel {
             }
             errorMessage = nil
             retryCommand = command
-            do { try await practiceFeature.perform(command) }
+            do { try await todayFeature.perform(command) }
             catch { errorMessage = error.localizedDescription }
         }
         queuedCommandTask = task

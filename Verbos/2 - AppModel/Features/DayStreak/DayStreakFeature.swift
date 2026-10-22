@@ -10,18 +10,18 @@ struct StreakDay: Identifiable {
 
 @MainActor @Observable
 final class DayStreakFeature {
-    private let practiceFeature: PracticeFeature
+    private let todayFeature: TodayFeature
     private let calendar: Calendar
 
-    init(practiceFeature: PracticeFeature, calendar: Calendar = .current) {
-        self.practiceFeature = practiceFeature
+    init(todayFeature: TodayFeature, calendar: Calendar = .current) {
+        self.todayFeature = todayFeature
         self.calendar = calendar
     }
 
-    var completedDays: Set<Date> { practiceFeature.completedActivityDays }
-    var today: Date { practiceFeature.today }
+    var completedDays: Set<Date> { todayFeature.completedActivityDays }
+    var today: Date { todayFeature.today }
     var completedDayCount: Int { completedDays.count }
-    var correctAnswerCount: Int { practiceFeature.sessions.reduce(0) { $0 + $1.correctCount } }
+    var correctAnswerCount: Int { todayFeature.sessions.reduce(0) { $0 + $1.correctCount } }
     var currentStreak: Int { Self.streak(endingNear: today, days: completedDays, calendar: calendar) }
     var longestStreak: Int {
         var previousDate: Date?
@@ -57,5 +57,5 @@ final class DayStreakFeature {
         return count
     }
 
-    func refresh() async throws { try await practiceFeature.perform(.refresh) }
+    func refresh() async throws { try await todayFeature.perform(.refresh) }
 }

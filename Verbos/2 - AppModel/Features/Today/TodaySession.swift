@@ -19,7 +19,7 @@ struct WordQuestion: Codable, Equatable, Sendable, Identifiable {
     }
 }
 
-struct PracticeSession: Codable, Equatable, Identifiable, Sendable {
+struct TodaySession: Codable, Equatable, Identifiable, Sendable {
     static let target = 20
     let id: UUID
     let day: Date
@@ -37,7 +37,7 @@ struct PracticeSession: Codable, Equatable, Identifiable, Sendable {
     var canChangeFocus: Bool { questionNumber == 1 && !isComplete }
 }
 
-enum PracticeError: LocalizedError {
+enum TodayError: LocalizedError {
     case unavailableSession, staleQuestion, focusLocked, unresolvedQuestion
     var errorDescription: String? {
         switch self {
