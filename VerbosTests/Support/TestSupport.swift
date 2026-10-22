@@ -4,11 +4,14 @@ import Testing
 
 enum TestFailure: Error { case storage }
 
-actor MemorySessions: SessionRepository {
+actor MemorySessions: SessionRepository, DoubloonRepository {
     var sessions: [TodaySession] = []
+    var doubloonWallet = DoubloonWallet()
     var shouldFail = false
+    var shouldFailWalletSave = false
     private(set) var saveCount = 0
     func fail(_ flag: Bool) { shouldFail = flag }
+    func failWalletSave(_ flag: Bool) { shouldFailWalletSave = flag }
     func fetchSessions() throws -> [TodaySession] {
         if shouldFail { throw TestFailure.storage }
         return sessions
@@ -18,6 +21,14 @@ actor MemorySessions: SessionRepository {
         sessions.removeAll { $0.id == session.id }
         sessions.append(session)
         saveCount += 1
+    }
+    func fetchDoubloonWallet() throws -> DoubloonWallet {
+        if shouldFail { throw TestFailure.storage }
+        return doubloonWallet
+    }
+    func saveDoubloonWallet(_ wallet: DoubloonWallet) throws {
+        if shouldFail || shouldFailWalletSave { throw TestFailure.storage }
+        doubloonWallet = wallet
     }
 }
 
@@ -59,6 +70,7 @@ enum ContentFixtures {
     let repository: MemorySessions
     let content: MemoryContent
     let library: LibraryFeature
+    let doubloons: DoubloonFeature
     let today: TodayFeature
     let streak: DayStreakFeature
     let clock: TestClock
@@ -72,7 +84,9 @@ enum ContentFixtures {
         self.calendar = calendar
         content = MemoryContent(try ContentFixtures.load())
         library = LibraryFeature(repository: content)
-        today = TodayFeature(repository: repository, calendar: calendar, now: { clock.date }, libraryFeature: library)
+        doubloons = DoubloonFeature(repository: repository, calendar: calendar, now: { clock.date })
+        today = TodayFeature(repository: repository, calendar: calendar, now: { clock.date }, libraryFeature: library,
+                             doubloonFeature: doubloons)
         streak = DayStreakFeature(todayFeature: today, calendar: calendar)
     }
     func start() async throws { try await today.perform(.start(extra: false, mode: .mixed)) }

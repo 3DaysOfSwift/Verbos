@@ -54,6 +54,9 @@ struct DayStreakView: View {
             }
             .background(themeManager.current.background)
             .navigationTitle("Day Streak").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                DoubloonBalanceToolbar(count: viewModel.doubloonBalance)
+            }
             .task { await viewModel.refresh().value }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { viewModel.refresh() }

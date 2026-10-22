@@ -7,13 +7,16 @@ final class AppModel {
     let dayStreakFeature: DayStreakFeature
     let settingsFeature: SettingsFeature
     let libraryFeature: LibraryFeature
+    let doubloonFeature: DoubloonFeature
     private var didFinishLaunching: Bool
 
-    init(todayFeature: TodayFeature, dayStreakFeature: DayStreakFeature, settingsFeature: SettingsFeature, libraryFeature: LibraryFeature) {
+    init(todayFeature: TodayFeature, dayStreakFeature: DayStreakFeature, settingsFeature: SettingsFeature,
+         libraryFeature: LibraryFeature, doubloonFeature: DoubloonFeature) {
         self.todayFeature = todayFeature
         self.dayStreakFeature = dayStreakFeature
         self.settingsFeature = settingsFeature
         self.libraryFeature = libraryFeature
+        self.doubloonFeature = doubloonFeature
         didFinishLaunching = false
     }
 
@@ -26,11 +29,14 @@ final class AppModel {
             cacheURL: storeURL.deletingLastPathComponent().appending(path: "Books.json"),
             networkingManager: NetworkingManager())
         let libraryFeature = LibraryFeature(repository: contentRepository)
-        let todayFeature = TodayFeature(repository: repository, libraryFeature: libraryFeature)
+        let doubloonFeature = DoubloonFeature(repository: repository)
+        let todayFeature = TodayFeature(repository: repository, libraryFeature: libraryFeature,
+                                        doubloonFeature: doubloonFeature)
         let dayStreakFeature = DayStreakFeature(todayFeature: todayFeature)
         let settingsFeature = SettingsFeature(defaults: .standard)
         return AppModel(todayFeature: todayFeature, dayStreakFeature: dayStreakFeature,
-                        settingsFeature: settingsFeature, libraryFeature: libraryFeature)
+                        settingsFeature: settingsFeature, libraryFeature: libraryFeature,
+                        doubloonFeature: doubloonFeature)
     }
 
     func applicationDidFinishLaunching() {

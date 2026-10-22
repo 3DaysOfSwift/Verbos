@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Verbos
 
@@ -21,6 +22,11 @@ import Testing
                     #expect(question.choices.filter { $0 == question.answer }.count == 1)
                     #expect(!question.person.isEmpty)
                     #expect(mode.tenses.contains(question.tense))
+                    let example = try #require(question.example)
+                    #expect(!example.spanishEnding.isEmpty)
+                    #expect(!example.english.contains("(plural)"))
+                    #expect(!example.english.contains("(singular)"))
+                    #expect(question.freshCopy().example == example)
                 }
             }
         }
@@ -33,6 +39,21 @@ import Testing
         #expect(try ConjugationQuestions.translation(verb: ser, tense: .imperfect, person: 0) == "I used to be")
         let future = try ConjugationQuestions.make(verb: ser, mode: .future)
         #expect(future.contains { $0.spanish == "seréis" && $0.answer == "You (plural) will be" })
+        let question = try #require(future.first { $0.person == "yo" })
+        #expect(question.example?.spanishEnding == "parte del equipo.")
+        #expect(question.example?.english == "I will be part of the team.")
+    }
+    @Test func savedQuestionsFromBeforeExamplesStillDecode() throws {
+        let content = try ContentFixtures.load()
+        let verb = try #require(content.verbs.first { $0.id == "ser" })
+        let question = try #require(ConjugationQuestions.make(verb: verb, mode: .future).first)
+        let encoded = try JSONEncoder().encode(question)
+        var legacy = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        legacy.removeValue(forKey: "example")
+        let decoded = try JSONDecoder().decode(WordQuestion.self, from: JSONSerialization.data(withJSONObject: legacy))
+        #expect(decoded.example == nil)
+        #expect(decoded.id == question.id)
+        #expect(decoded.choices == question.choices)
     }
     @Test func failedUpdateRetainsBooks() async throws {
         let env = try TestEnvironment()

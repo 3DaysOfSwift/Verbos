@@ -8,6 +8,7 @@ struct WordQuestion: Codable, Equatable, Sendable, Identifiable {
     let tense: LearningMode
     let answer: String
     let choices: [String]
+    var example: VerbExample?
     var wrongAnswers: Set<String> = []
     var isRevealed = false
     var isAnswered = false
@@ -15,8 +16,13 @@ struct WordQuestion: Codable, Equatable, Sendable, Identifiable {
 
     func freshCopy() -> Self {
         Self(id: UUID(), spanish: spanish, person: person, verbID: verbID, tense: tense,
-             answer: answer, choices: choices.shuffled())
+             answer: answer, choices: choices.shuffled(), example: example)
     }
+}
+
+struct VerbExample: Codable, Equatable, Sendable {
+    let spanishEnding: String
+    let english: String
 }
 
 struct TodaySession: Codable, Equatable, Identifiable, Sendable {

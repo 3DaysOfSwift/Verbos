@@ -42,9 +42,18 @@ enum ConjugationQuestions {
                 let distractors = translations.filter { $0 != answer }.shuffled().prefix(8)
                 questions.append(WordQuestion(id: UUID(), spanish: forms[person],
                     person: spanishPeople[person], verbID: verb.id, tense: tense,
-                    answer: answer, choices: (Array(distractors) + [answer]).shuffled()))
+                    answer: answer, choices: (Array(distractors) + [answer]).shuffled(),
+                    example: example(verb: verb, answer: answer)))
             }
         }
         return questions.shuffled()
+    }
+
+    static func example(verb: LearningVerb, answer: String) -> VerbExample {
+        let naturalAnswer = answer
+            .replacingOccurrences(of: " (singular)", with: "")
+            .replacingOccurrences(of: " (plural)", with: "")
+        return VerbExample(spanishEnding: verb.tail + ".",
+                           english: naturalAnswer + " " + verb.englishTail + ".")
     }
 }

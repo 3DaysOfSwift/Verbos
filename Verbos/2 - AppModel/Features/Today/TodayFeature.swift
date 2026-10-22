@@ -20,17 +20,19 @@ final class TodayFeature {
     private let repository: any SessionRepository
     private let now: () -> Date
     private let libraryFeature: LibraryFeature
+    private let doubloonFeature: DoubloonFeature
     private(set) var selectedVerbID = "ser"
     @ObservationIgnored private var operationTask: Task<Void, Error>?
     @ObservationIgnored private var operationID: UUID?
 
     init(repository: any SessionRepository, calendar: Calendar = .current,
          now: @escaping () -> Date = Date.init,
-         libraryFeature: LibraryFeature) {
+         libraryFeature: LibraryFeature, doubloonFeature: DoubloonFeature) {
         self.repository = repository
         self.calendar = calendar
         self.now = now
         self.libraryFeature = libraryFeature
+        self.doubloonFeature = doubloonFeature
         today = calendar.startOfDay(for: now())
     }
 
@@ -79,10 +81,22 @@ final class TodayFeature {
             sessions = try await repository.fetchSessions()
             hasLoaded = true
         }
+        try await reconcileProgressRewards()
         switch command {
         case .refresh:
-            // A saved session carries its own deck and can resume even if content is unavailable.
             if currentSession == nil { try await libraryFeature.load() }
+            if var session = currentSession, !session.isComplete,
+               session.question.example == nil || session.deck.contains(where: { $0.example == nil }) {
+                // Upgrade older saved questions without replacing their answers or progress.
+                try await libraryFeature.load()
+                if session.question.example == nil {
+                    session.question.example = try libraryFeature.example(for: session.question)
+                }
+                for index in session.deck.indices where session.deck[index].example == nil {
+                    session.deck[index].example = try libraryFeature.example(for: session.deck[index])
+                }
+                try await save(session)
+            }
             return
         case let .start(extra, mode):
             guard extra ? canStartExtraPractice : todaySessions.isEmpty else {
@@ -163,6 +177,13 @@ final class TodayFeature {
             sessions[index] = session
         } else {
             sessions.append(session)
+        }
+        try await doubloonFeature.awardProgress(for: session)
+    }
+
+    private func reconcileProgressRewards() async throws {
+        for session in sessions where session.correctCount >= 10 {
+            try await doubloonFeature.awardProgress(for: session)
         }
     }
 }

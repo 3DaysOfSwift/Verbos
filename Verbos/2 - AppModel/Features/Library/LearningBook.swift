@@ -29,6 +29,8 @@ struct LearningVerb: Codable, Identifiable, Sendable {
     let english: String
     let third: String
     let past: String
+    let tail: String
+    let englishTail: String
     let forms: [String: [String]]
 }
 

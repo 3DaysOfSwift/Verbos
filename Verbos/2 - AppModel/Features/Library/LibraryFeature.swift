@@ -67,4 +67,11 @@ final class LibraryFeature {
         }
         return try ConjugationQuestions.make(verb: verb, mode: mode)
     }
+
+    func example(for question: WordQuestion) throws -> VerbExample {
+        guard let verb = verbs.first(where: { $0.id == question.verbID }) else {
+            throw LearningContentError.missingContent
+        }
+        return ConjugationQuestions.example(verb: verb, answer: question.answer)
+    }
 }
